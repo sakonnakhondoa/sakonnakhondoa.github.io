@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <base target="_top">
+    <title>ระบบแอดมินและแดชบอร์ด</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+
+/* Hybrid Dark Airport Theme */
+:root {
+--color-dark-bg: #0F1115; /* Dark but readable */
+--color-dark-card: #181B21; /* Slightly lighter for contrast */
+--color-dark-border: #2A2D34;
+--color-primary: #50FF6B; /* Runway Green */
+--color-secondary: #4DA3FF; /* Taxiway Blue */
+--color-warning: #FFC857; /* Amber */
+--color-error: #FF3D51; /* Stop Bar Red */
+--text-light: #E6E9EF;
+}
+
+
+.dark {
+color-scheme: dark;
+font-family: 'Inter', sans-serif;
+background: linear-gradient(180deg, #0D0F12 0%, #121418 100%);
+color: var(--text-light);
+}
+
+
+.dark .bg-dark-bg { background-color: var(--color-dark-bg); }
+.dark .bg-dark-card { background-color: var(--color-dark-card); }
+.dark .border-dark-border { border-color: var(--color-dark-border); }
+
+
+.dark .text-primary { color: var(--color-primary); }
+.dark .text-secondary { color: var(--color-secondary); }
+.dark .text-warning { color: var(--color-warning); }
+.dark .text-error { color: var(--color-error); }
+
+
+.dark .bg-primary { background-color: var(--color-primary); }
+.dark .bg-secondary { background-color: var(--color-secondary); }
+.dark .bg-warning { background-color: var(--color-warning); }
+.dark .bg-error { background-color: var(--color-error); }
+
+
+/* Input Fields */
+.dark input,
+.dark select,
+.dark textarea {
+background-color: #1E2127;
+border: 1px solid var(--color-dark-border);
+color: var(--text-light);
+transition: 0.2s ease;
+}
+
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+border-color: var(--color-primary);
+box-shadow: 0 0 8px rgba(80, 255, 107, 0.4);
+}
+
+
+/* Buttons */
+.dark button.bg-primary {
+background-color: var(--color-primary);
+color: #000;
+font-weight: 700;
+box-shadow: 0 0 12px rgba(80, 255, 107, 0.4);
+transition: 0.25s;
+}
+
+/* สไตล์สำหรับลิงก์ Navigation แบบ Dark UI Minimal Tab Style */
+        .nav-link-dark {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            padding: 0.75rem 1rem; /* เพิ่ม Padding ให้ดูเป็นพื้นที่คลิก */
+            margin-bottom: -2px; /* ชดเชยให้ Active border ทับเส้นรวม */
+            border-radius: 0.5rem 0.5rem 0 0; /* โค้งมนเฉพาะด้านบน */
+            color: var(--text-light);
+            font-weight: 500;
+            background-color: transparent;
+            border-bottom: 2px solid transparent; /* เส้นขีดใสเตรียมไฮไลท์ */
+            text-decoration: none; /* เอาขีดเส้นใต้เริ่มต้นออก */
+        }
+
+        /* สไตล์เมื่อนำเมาส์ไปชี้ */
+        .nav-link-dark:hover {
+            color: var(--color-primary); /* เปลี่ยนเป็นสีหลักเมื่อ Hover */
+            background-color: var(--color-dark-border); /* พื้นหลังเข้มขึ้นเล็กน้อย */
+        }
+
+        /* สไตล์สำหรับลิงก์ที่ Active (กำลังเลือกอยู่) */
+        .nav-link-dark.active {
+            color: var(--color-primary); /* ตัวอักษรสีหลัก */
+            border-bottom: 2px solid var(--color-primary); /* เส้นขีดด้านล่างสีหลัก (Runway Green) */
+            background-color: var(--color-dark-card); /* พื้นหลังสีเข้มกว่า BG เล็กน้อย */
+            font-weight: 600;
+        }
+.dark button.bg-primary:hover {
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+
+</head>
+
+<body class="p-4 sm:p-8 bg-dark-bg text-gray-200 min-h-screen">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold text-center text-primary mb-2">SAKON NAKHON AIRPORT</h1>
+        <h2 class="text-xl font-semibold text-center text-white mb-8">Admin Dashboard & User Management</h2>
+
+        <nav class="flex space-x-3 border-b-2 border-dark-border mb-8">
+    <a onclick="switchTab('insideUsers')" id="tab-insideUsers" class="nav-link-dark active">ผู้ที่อยู่ในพื้นที่</a>
+    <a onclick="switchTab('accessLogs')" id="tab-accessLogs" class="nav-link-dark">บันทึกการเข้าออก</a>
+    <a onclick="switchTab('search')" id="tab-search" class="nav-link-dark">ค้นหารายบุคคล</a>
+    <a onclick="switchTab('crud')" id="tab-crud" class="nav-link-dark">จัดการผู้ใช้งาน (CRUD)</a>
+</nav>      
+
+        <div id="statusMessage" class="p-3 rounded mb-4 hidden font-medium"></div>
+
+        <div id="content" class="mt-8">
+            <div id="insideUsersTab" class="content-tab">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-dark-card p-6 rounded-xl shadow-lg border border-primary">
+                        <p class="text-sm font-medium text-primary">จำนวนผู้ลงทะเบียนทั้งหมด</p>
+                        <p id="totalUserCount" class="text-4xl font-extrabold text-white mt-2">0</p>
+                    </div>
+                    <div class="bg-dark-card p-6 rounded-xl shadow-lg border border-secondary">
+                        <p class="text-sm font-medium text-secondary">ผู้ที่อยู่ในพื้นที่ตอนนี้</p>
+                        <p id="insideUserCount" class="text-4xl font-extrabold text-white mt-2">กำลังโหลด...</p>
+                    </div>
+                    <div class="bg-dark-card p-6 rounded-xl shadow-lg border border-warning">
+                        <p class="text-sm font-medium text-warning">จำนวนบัตรชั่วคราวในพื้นที่</p>
+                        <p id="temporaryInsideCount" class="text-4xl font-extrabold text-white mt-2">กำลังโหลด...</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-dark-card p-6 rounded-xl shadow-lg border border-dark-border overflow-x-auto">
+                    <h3 class="text-xl font-semibold text-white mb-4">รายชื่อผู้ที่กำลังอยู่ในพื้นที่</h3>
+                    <button onclick="loadInsideUsers()" class="px-3 py-1 mb-3 text-sm bg-secondary text-white rounded hover:bg-blue-600">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.836 0v-5h-.582m0 5l-2.5-2.5M4.582 9l2.5-2.5m10 5a8 8 0 11-16 0 8 8 0 0116 0z"></path></svg>
+                        รีเฟรชข้อมูล
+                    </button>
+                    <table class="min-w-full divide-y divide-dark-border">
+                        <thead class="table-header">
+                            <tr>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ภาพ</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">รหัสเจ้าหน้าที่</th> 
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ชื่อ-นามสกุล</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">หน่วยงาน/สังกัด</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ตำแหน่ง</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ประเภทบัตร</th> 
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">คนรับรอง</th> 
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">เวลาเข้า</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ประตู</th>
+                            </tr>
+                        </thead>
+                        <tbody id="insideUsersTableBody" class="divide-y divide-dark-border">
+                            <tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="crudTab" class="content-tab hidden">
+                <div id="crudStatus" class="p-3 rounded mb-4 hidden font-medium"></div>
+                
+                <div class="mt-8 bg-dark-card p-6 rounded-xl shadow-lg border border-dark-border overflow-x-auto">
+                    <h3 class="text-xl font-semibold text-white mb-4">จัดการผู้ใช้งาน (CRUD)</h3>
+                    <button onclick="loadCRUDData()" class="px-3 py-1 mb-3 text-sm bg-secondary text-white rounded hover:bg-blue-600">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.836 0v-5h-.582m0 5l-2.5-2.5M4.582 9l2.5-2.5m10 5a8 8 0 11-16 0 8 8 0 0116 0z"></path></svg>
+                        รีเฟรชข้อมูล
+                    </button>
+                    <table class="min-w-full divide-y divide-dark-border">
+                        <thead class="table-header">
+                            <tr>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ภาพ</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">รหัสเจ้าหน้าที่</th> 
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ชื่อ-นามสกุล</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">หน่วยงาน/สังกัด</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ตำแหน่ง</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ประเภทบัตร</th> 
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">วันหมดอายุ</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="crudTableBody" class="divide-y divide-dark-border">
+                            <tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="accessLogsTab" class="content-tab hidden">
+                <div class="mt-8 bg-dark-card p-6 rounded-xl shadow-lg border border-dark-border overflow-x-auto">
+                    <h3 class="text-xl font-semibold text-white mb-4">บันทึกการเข้าออกล่าสุด (500 รายการล่าสุด)</h3>
+                    <table class="min-w-full divide-y divide-dark-border">
+                        <thead class="table-header">
+                            <tr>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">วันเวลา</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">สถานะ</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">รหัสเจ้าหน้าที่</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ชื่อ-นามสกุล</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ประตู</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ประเภทบัตร</th>
+                                <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">คนรับรอง</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accessLogsTableBody" class="divide-y divide-dark-border">
+                            <tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">กดแท็บ 'บันทึกการเข้าออก' เพื่อโหลด</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="searchTab" class="content-tab hidden">
+                <div class="mt-8 bg-dark-card p-6 rounded-xl shadow-lg border border-dark-border">
+                    <h3 class="text-xl font-semibold text-white mb-4">ค้นหาบันทึกการเข้าออกรายบุคคล</h3>
+                    <form id="searchForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div>
+                <label for="searchRegId" class="block text-sm font-medium text-gray-400 mb-1">รหัส-ชื่อเจ้าหน้าที่</label>
+                <input type="text" id="searchRegId" placeholder="กรอกรหัสเจ้าหน้าที่" required 
+                       class="w-full px-3 py-2 bg-dark-bg border border-dark-border rounded-lg focus:ring-primary focus:border-primary">
+            </div>
+
+            <div>
+                <label for="searchDateFrom" class="block text-sm font-medium text-gray-400 mb-1">จากวันที่</label>
+                <input type="date" id="searchDateFrom" 
+                       class="w-full px-3 py-2 bg-dark-bg border border-dark-border rounded-lg focus:ring-primary focus:border-primary">
+            </div>
+
+            <div>
+                <label for="searchDateTo" class="block text-sm font-medium text-gray-400 mb-1">ถึงวันที่</label>
+                <input type="date" id="searchDateTo" 
+                       class="w-full px-3 py-2 bg-dark-bg border border-dark-border rounded-lg focus:ring-primary focus:border-primary">
+            </div>
+
+            <div>
+                <button type="submit" class="w-full px-4 py-3 bg-primary text-dark-card rounded-lg shadow-md hover:bg-green-600 font-semibold">
+                    ค้นหา
+                </button>
+            </div>
+
+            <div class="md:col-span-4">
+                <button type="button" onclick="printSearchReport()" id="printReportButton" class="w-full px-4 py-3 bg-secondary text-white rounded-lg shadow-md hover:bg-blue-600 font-semibold disabled:bg-gray-600" disabled>
+                    พิมพ์รายงาน
+                </button>
+            </div>
+            
+        </form>
+
+                    <div id="searchStatus" class="p-3 rounded mt-4 hidden font-medium"></div>
+
+                    <div class="mt-8 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-dark-border">
+                            <thead class="table-header">
+                                <tr>
+                                    
+                                    <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">วันเวลา</th>
+                                    <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">สถานะ</th>
+                                    <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ประตู</th>
+                                    <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">ประเภทบัตร</th>
+                                    <th class="px-3 py-3 text-left text-xs text-secondary font-medium uppercase tracking-wider">คนรับรอง</th>
+                                </tr>
+                            </thead>
+                            <tbody id="searchLogsTableBody" class="divide-y divide-dark-border">
+                                <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">ไม่มีข้อมูลบันทึก</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-dark-card p-6 rounded-xl shadow-2xl w-full max-w-lg mx-auto transform transition-all">
+            <h3 class="text-2xl font-bold text-primary mb-6 text-center">แก้ไขข้อมูลผู้ใช้งาน</h3>
+            <form id="editForm" class="space-y-4">
+                <input type="hidden" id="edit-row-number" name="rowNumber">
+                <input type="hidden" id="edit-original-regId" name="originalRegId">
+
+                <div>
+                    <label class="block text-sm font-medium">รหัสเจ้าหน้าที่ (ใหม่) <span class="text-red-500">*</span></label>
+                    <input type="text" id="edit-new-regId" name="newRegId" required class="mt-1 block w-full rounded-md shadow-sm p-3 uppercase tracking-wider">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">URL รูปโปรไฟล์</label>
+                    <input type="url" id="edit-profileUrl" name="profileUrl" class="mt-1 block w-full rounded-md shadow-sm p-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">ชื่อ-นามสกุล <span class="text-red-500">*</span></label>
+                    <input type="text" id="edit-fullName" name="fullName" required class="mt-1 block w-full rounded-md shadow-sm p-3">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium">หน่วยงาน/สังกัด <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit-department" name="department" required class="mt-1 block w-full rounded-md shadow-sm p-3">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">ตำแหน่ง <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit-position" name="position" required class="mt-1 block w-full rounded-md shadow-sm p-3">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                     <div>
+                        <label class="block text-sm font-medium">เบอร์โทรศัพท์ <span class="text-red-500">*</span></label>
+                        <input type="tel" id="edit-phone" name="phone" required class="mt-1 block w-full rounded-md shadow-sm p-3">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">เลขที่ (บัตร)</label>
+                        <input type="text" id="edit-driverLicenseNo" name="driverLicenseNo" class="mt-1 block w-full rounded-md shadow-sm p-3">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">หมายเลขเขตพื้นที่</label>
+                    <input type="text" id="edit-aviationAreas" name="aviationAreas" class="mt-1 block w-full rounded-md shadow-sm p-3">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="edit-cardType" class="block text-sm font-medium">ประเภทบัตร <span class="text-red-500">*</span></label>
+                        <select id="edit-cardType" name="cardType" required class="mt-1 block w-full rounded-md shadow-sm p-3">
+                            <option value="ถาวร">ถาวร</option>
+                            <option value="ชั่วคราว">ชั่วคราว</option>
+                            <option value="VIP">VIP</option>
+                            <option value="EMS">EMS</option>
+                            <option value="เยี่ยมชม">เยี่ยมชม</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit-expiryDate" class="block text-sm font-medium">วันหมดอายุ <span class="text-red-500">*</span></label>
+                        <input type="date" id="edit-expiryDate" name="expiryDate" required class="mt-1 block w-full rounded-md shadow-sm p-3">
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4 pt-4">
+                    <button type="button" onclick="document.getElementById('editModal').classList.add('hidden')"
+                            class="px-4 py-2 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600 font-semibold">
+                        ยกเลิก
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-primary text-white rounded-lg shadow-md hover:bg-green-600 font-semibold">
+                        บันทึกการเปลี่ยนแปลง
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center">
+        <div class="flex flex-col items-center bg-dark-card p-6 rounded-lg">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+            <p class="mt-4 text-white">กำลังโหลดข้อมูล...</p>
+        </div>
+    </div>
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-dark-card p-6 rounded-xl shadow-2xl w-full max-w-lg mx-auto transform transition-all border border-primary">
+            <h3 class="text-2xl font-bold text-primary mb-4 border-b border-dark-border pb-2">รายละเอียดข้อมูล</h3>
+            <div id="detailContent">
+                <div class="text-center mb-6">
+                    <img id="detailProfileImg" src="" alt="Profile" class="w-28 h-28 rounded-full object-cover border-4 border-primary mx-auto my-3">
+                    <p class="text-xl font-semibold text-white" id="detailFullName"></p>
+                    <p class="text-gray-400" id="detailRegId"></p>
+                    <p class="text-gray-300" id="detailPhone"></p>
+                </div>
+
+                <div class="space-y-2 mb-6 text-gray-400">
+                    <div class="detail-field"><span>หน่วยงาน/สังกัด :</span> <span id="detailDepartment" class="font-medium text-gray-300"></span></div>
+                    <div class="detail-field"><span>ตำแหน่ง :</span> <span id="detailPosition" class="font-medium text-gray-300"></span></div>
+                    <div class="detail-field"><span>ประเภทบัตร :</span> <span id="detailCardType" class="font-medium text-secondary"></span></div>
+                    <div class="detail-field"><span>หมายเลขเขตพื้นที่ :</span> <span id="detailAviationAreas" class="font-medium text-warning"></span></div>
+                    <div class="detail-field"><span>วันหมดอายุบัตร :</span> <span id="detailExpiry" class="font-medium text-error"></span></div>
+                </div>
+                
+                <div id="lastAccessContainer" class="space-y-2 p-3 bg-dark-bg rounded-lg text-gray-400">
+                  <h4 class="text-lg font-semibold text-primary border-b border-dark-border pb-1">บันทึกการเข้าล่าสุด</h4>
+                    <div class="detail-field"><span>วันเวลาเข้า :</span> <span id="detailTimestamp" class="font-medium text-primary"></span></div>
+                    <div class="detail-field"><span>จุดสแกนเข้า :</span> <span id="detailGate" class="font-medium text-gray-300"></span></div>
+                    <div class="detail-field"><span>ผู้รับรอง (Escort) :</span> <span id="detailEscort" class="font-medium text-gray-300"></span></div>
+                    <div class="detail-field"><span>อุปกรณ์ที่นำเข้า :</span> <span id="detailEquipment" class="font-medium text-warning"></span></div>
+                </div>
+                
+            </div>
+            <button onclick="hideModal('detailModal')" 
+                    class="mt-6 w-full px-4 py-3 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 font-semibold">
+                ปิด
+            </button>
+        </div>
+    </div>
+
+    <script>
+
+      
+        // =========================================================
+        // 1. HELPER FUNCTIONS (UI/UX)
+        // =========================================================
+        // ฟังก์ชันสำหรับสลับแท็บเมนู
+function switchTab(tabId) {
+    // 1. จัดการ Active State ของ Navigation Links (ส่วนนี้ถูกต้องแล้ว)
+    const navLinks = document.querySelectorAll('.nav-link-dark');
+    
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+
+    const activeLink = document.getElementById(`tab-${tabId}`);
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
+
+    // 2. จัดการการแสดงผลของ Tab Content
+
+    // ซ่อนเนื้อหาแท็บทั้งหมด (แก้ไข: 'searchLogsTab' เป็น 'searchTab')
+    document.getElementById('insideUsersTab').classList.add('hidden');
+    document.getElementById('accessLogsTab').classList.add('hidden');
+    document.getElementById('searchTab').classList.add('hidden'); // *** แก้ไขแล้ว
+    document.getElementById('crudTab').classList.add('hidden'); 
+    
+    // แสดงเนื้อหาแท็บที่ถูกเลือก
+    if (tabId === 'insideUsers') {
+        document.getElementById('insideUsersTab').classList.remove('hidden');
+        loadInsideUsers(); // โหลดข้อมูลผู้ที่อยู่ในพื้นที่เมื่อสลับมาแท็บนี้
+    } else if (tabId === 'accessLogs') {
+        document.getElementById('accessLogsTab').classList.remove('hidden');
+        loadAccessLogs(); // โหลดข้อมูลบันทึกการเข้าออกเมื่อสลับมาแท็บนี้
+    } else if (tabId === 'search') {
+        document.getElementById('searchTab').classList.remove('hidden'); // *** แก้ไขแล้ว
+    } else if (tabId === 'crud') {
+        document.getElementById('crudTab').classList.remove('hidden');
+    }
+}
+
+        function showStatus(targetId, type, message) {
+            const statusDiv = document.getElementById(targetId);
+            statusDiv.classList.remove('hidden', 'bg-red-800', 'bg-green-800', 'bg-blue-800');
+            
+            let bgClass = '';
+            if (type === 'success') bgClass = 'bg-green-800';
+            else if (type === 'error') bgClass = 'bg-red-800';
+            else if (type === 'info') bgClass = 'bg-blue-800';
+
+            statusDiv.classList.add(bgClass);
+            statusDiv.textContent = message;
+        }
+
+        function showLoading() {
+            document.getElementById('loadingModal').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingModal').classList.add('hidden');
+        }
+
+        function showModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function hideModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+        // =========================================================
+        // 2. DATA LOADING FUNCTIONS
+        // =========================================================
+
+        const loadTotalUserCount = () => {
+            const countElement = document.getElementById('totalUserCount');
+              if (!countElement) return;
+
+              countElement.textContent = 'กำลังโหลด...';
+
+              google.script.run
+                .withSuccessHandler(count => {
+                if (count >= 0) {
+                    countElement.textContent = count.toString();
+                } else {
+                    countElement.textContent = 'ข้อผิดพลาด';
+                    console.error('Error fetching total user count from server.');
+                }
+            })
+            .withFailureHandler(err => {
+                countElement.textContent = 'ข้อผิดพลาด';
+                console.error('API Failure:', err.message);
+            })
+            .getTotalUserCount(); 
+        };
+
+        const loadInsideUsers = () => {
+            const tableBody = document.getElementById('insideUsersTableBody');
+            tableBody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-white">กำลังโหลดข้อมูล...</td></tr>';
+            
+            google.script.run
+                .withSuccessHandler(users => {
+                    let html = '';
+                    let insideCount = 0;
+                    let temporaryCount = 0;
+                    if (users.length === 0) {
+                        html = '<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">ไม่มีผู้ใช้งานอยู่ในพื้นที่</td></tr>';
+                    } else {
+                        users.forEach(user => {
+                            insideCount++;
+                            if (user.cardType === 'ชั่วคราว') temporaryCount++;
+                            
+                            const escortDisplay = user.cardType === 'ชั่วคราว' && user.escortName ? user.escortName : '-'; 
+                            html += `
+                                <tr class="hover:bg-dark-border cursor-pointer" onclick="showUserDetail('${user.regId}')"> 
+                                    <td class="px-3 py-2 whitespace-nowrap"><img src="${user.profileUrl || 'https://placehold.co/150x150/0F1115/E6E9EF/png?text=NO+IMG'}" class="h-8 w-8 rounded-full object-cover"></td>
+                                    <td class="px-3 py-2 whitespace-nowrap">${user.regId}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap">${user.fullName}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap">${user.department}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap">${user.position}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap font-semibold">${user.cardType}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-xs text-yellow-400">${escortDisplay}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm">${user.timeIn}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap">${user.gate}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    document.getElementById('insideUserCount').textContent = insideCount.toString();
+                    document.getElementById('temporaryInsideCount').textContent = temporaryCount.toString();
+                    tableBody.innerHTML = html;
+                })
+                .withFailureHandler(err => {
+                    tableBody.innerHTML = `<tr><td colspan="9" class="px-6 py-4 text-center text-error">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</td></tr>`;
+                    console.error("Error loading inside users:", err);
+                })
+                .getInsideUsers();
+        };
+
+        const loadCRUDData = () => {
+            const tableBody = document.getElementById('crudTableBody');
+            tableBody.innerHTML = '<tr><td colspan="8" class="px-6 py-4 text-center text-white">กำลังโหลดข้อมูล...</td></tr>';
+            
+            google.script.run
+                .withSuccessHandler(users => {
+                    let html = '';
+                    if (users.length === 0) {
+                        html = '<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">ไม่มีข้อมูลผู้ใช้งาน</td></tr>';
+                    } else {
+                        users.forEach(user => {
+                            html += `
+                                <tr class="hover:bg-dark-border" data-user='${JSON.stringify(user)}'>
+                                    <td class="px-3 py-2 whitespace-nowrap"><img src="${user.profileUrl || 'https://placehold.co/150x150/0F1115/E6E9EF/png?text=NO+IMG'}" class="h-8 w-8 rounded-full object-cover"></td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-primary">${user.regId}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap">${user.fullName}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap">${user.department}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap">${user.position}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap font-semibold">${user.cardType}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap">${user.expiryDate}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap">
+                                        <button onclick="openEditModal(this)" class="text-secondary hover:text-blue-400 font-medium mr-3">แก้ไข</button>
+                                        <button onclick="deleteUserPrompt('${user.regId}')" class="text-error hover:text-red-400 font-medium">ลบ</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    tableBody.innerHTML = html;
+                    loadTotalUserCount();
+                })
+                .withFailureHandler(err => {
+                    tableBody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-error">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</td></tr>`;
+                    console.error("Error loading CRUD data:", err);
+                })
+                .getAllUsers();
+        };
+
+        const loadAccessLogs = () => {
+            const tableBody = document.getElementById('accessLogsTableBody');
+            tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-white">กำลังโหลดข้อมูล...</td></tr>';
+
+            google.script.run
+                .withSuccessHandler(logs => {
+                    let html = '';
+                    if (logs.length === 0) {
+                        html = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">ไม่มีบันทึกการเข้าออก</td></tr>';
+                    } else {
+                        logs.forEach(log => {
+                             const statusColor = log.status === 'เข้า' ? 'text-green-400' : 'text-red-400';
+                             const escortDisplay = log.cardType === 'ชั่วคราว' && log.escortName ? log.escortName : '-'; 
+                            html += `
+                                <tr class="hover:bg-dark-border">
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm">${log.timestamp}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap font-semibold ${statusColor}">${log.status}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap">${log.regId}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap">${log.fullName}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap">${log.gate}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap">${log.cardType}</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-xs text-yellow-400">${escortDisplay}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    tableBody.innerHTML = html;
+                })
+                .withFailureHandler(err => {
+                    tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-error">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</td></tr>`;
+                    console.error("Error loading access logs:", err);
+                })
+                .getAllAccessLogs();
+        };
+
+
+        // =========================================================
+        // 3. CRUD LOGIC (EDIT/DELETE)
+        // =========================================================
+        
+        const openEditModal = (button) => {
+            const row = button.closest('tr');
+            const userData = JSON.parse(row.getAttribute('data-user'));
+            
+            document.getElementById('edit-row-number').value = userData.rowNumber;
+            document.getElementById('edit-original-regId').value = userData.regId;
+            
+            // Populate form fields
+            document.getElementById('edit-new-regId').value = userData.regId;
+            document.getElementById('edit-profileUrl').value = userData.profileUrl;
+            document.getElementById('edit-fullName').value = userData.fullName;
+            document.getElementById('edit-department').value = userData.department;
+            document.getElementById('edit-position').value = userData.position;
+            document.getElementById('edit-phone').value = userData.phone;
+            document.getElementById('edit-driverLicenseNo').value = userData.driverLicenseNo;
+            document.getElementById('edit-aviationAreas').value = userData.aviationAreas;
+            document.getElementById('edit-expiryDate').value = userData.expiryDate;
+            document.getElementById('edit-cardType').value = userData.cardType; 
+            
+            document.getElementById('editModal').classList.remove('hidden');
+        };
+
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                rowNumber: document.getElementById('edit-row-number').value,
+                originalRegId: document.getElementById('edit-original-regId').value,
+                profileUrl: document.getElementById('edit-profileUrl').value,
+                newRegId: document.getElementById('edit-new-regId').value.trim().toUpperCase(),
+                fullName: document.getElementById('edit-fullName').value,
+                department: document.getElementById('edit-department').value,
+                position: document.getElementById('edit-position').value,
+                phone: document.getElementById('edit-phone').value,
+                driverLicenseNo: document.getElementById('edit-driverLicenseNo').value,
+                aviationAreas: document.getElementById('edit-aviationAreas').value,
+                expiryDate: document.getElementById('edit-expiryDate').value,
+                cardType: document.getElementById('edit-cardType').value, 
+            };
+
+            document.getElementById('editModal').classList.add('hidden');
+            showStatus('crudStatus', 'info', 'กำลังบันทึกข้อมูล...');
+
+            google.script.run
+                .withSuccessHandler(result => {
+                    showStatus('crudStatus', result.success ? 'success' : 'error', result.message);
+                    if (result.success) loadCRUDData(); // Refresh table
+                })
+                .withFailureHandler(err => showStatus('crudStatus', 'error', 'Error: ' + err.message))
+                .updateUser(formData);
+        });
+        
+        const deleteUserPrompt = (regId) => {
+            if (confirm(`คุณแน่ใจหรือไม่ที่ต้องการลบผู้ใช้งานรหัส ${regId} นี้? (ข้อมูลการเข้าออกจะยังคงอยู่)`)) {
+                 showStatus('crudStatus', 'info', `กำลังลบผู้ใช้งาน ${regId}...`);
+                
+                google.script.run
+                    .withSuccessHandler(result => {
+                        showStatus('crudStatus', result.success ? 'success' : 'error', result.message);
+                        if (result.success) loadCRUDData(); // Refresh table
+                    })
+                    .withFailureHandler(err => showStatus('crudStatus', 'error', 'Error: ' + err.message))
+                    .deleteUser(regId);
+            }
+        };
+
+
+        // =========================================================
+        // 4. SEARCH LOGIC (FIXED)
+        // =========================================================
+
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const regId = document.getElementById('searchRegId').value.trim().toUpperCase();
+            // ดึงค่าวันที่จากฟอร์ม
+            const dateFrom = document.getElementById('searchDateFrom').value; // YYYY-MM-DD
+            const dateTo = document.getElementById('searchDateTo').value;   // YYYY-MM-DD
+
+            if (!regId) return;
+
+            showStatus('searchStatus', 'info', `กำลังค้นหาบันทึกสำหรับรหัส ${regId} [${dateFrom || 'ตลอด'}-${dateTo || 'ตลอด'}]...`);
+
+            google.script.run
+                .withSuccessHandler(onSearchSuccess)
+                .withFailureHandler(onSearchFailure)
+                // *** FIX: เปลี่ยนชื่อฟังก์ชันเป็น getIndividualAccessLogs และส่งวันที่เพิ่ม ***
+                .getIndividualAccessLogs(regId, dateFrom, dateTo);
+        });
+
+        function onSearchSuccess(logs) {
+    hideModal('loadingModal');
+    let html = '';
+    const printButton = document.getElementById('printReportButton'); // ดึงปุ่ม
+    
+    // 1. ตรวจสอบจำนวนผลลัพธ์เพื่อเปิด/ปิดปุ่มพิมพ์
+    if (logs.length > 0) {
+        printButton.disabled = false; // เปิดใช้งานปุ่ม
+        
+        logs.forEach(log => {
+            // ... (โค้ดสร้างตารางเดิม)
+            const statusColor = log.status === 'เข้า' ? 'text-primary' : 'text-error';
+            const escortDisplay = log.cardType === 'ชั่วคราว' && log.escortName ? log.escortName : '-'; 
+
+            html += `
+                <tr class="hover:bg-dark-border">
+                    <td class="px-3 py-2 whitespace-nowrap text-sm">${log.timestamp}</td>
+                    <td class="px-3 py-2 whitespace-nowrap font-semibold ${statusColor}">${log.status}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">${log.gate}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">${log.cardType}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-xs text-yellow-400">${escortDisplay}</td>
+                </tr>
+            `;
+        });
+        showStatus('searchStatus', 'success', `พบข้อมูลบันทึก ${logs.length} รายการ`);
+    } else {
+        printButton.disabled = true; // ปิดใช้งานปุ่ม
+        html = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-400">ไม่พบบันทึกสำหรับเงื่อนไขนี้</td></tr>';
+        showStatus('searchStatus', 'warning', `ไม่พบบันทึก`);
+    }
+
+    // 2. เก็บข้อมูล Logs ที่ค้นหาล่าสุดไว้ในตัวแปร Global
+    window.lastSearchedLogs = logs; 
+    
+    document.getElementById('searchLogsTableBody').innerHTML = html;
+}
+
+        function onSearchFailure(error) {
+            showStatus('searchStatus', 'error', 'เกิดข้อผิดพลาดในการค้นหา: ' + error.message);
+            document.getElementById('searchLogsTableBody').innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-error">เกิดข้อผิดพลาดในการค้นหา</td></tr>';
+        }
+
+        // =========================================================
+        // 4.1 USER DETAIL POPUP LOGIC
+        // =========================================================
+
+        function showUserDetail(regId) {
+            showModal('loadingModal'); // แสดง Modal โหลดข้อมูล (ถ้ามี)
+    
+            google.script.run
+            .withSuccessHandler(onUserDetailSuccess)
+            .withFailureHandler(onUserDetailFailure)
+            .getInsideUserDetail(regId);
+        }
+
+function onUserDetailSuccess(result) {
+    hideModal('loadingModal');
+
+    if (!result.success) {
+        showStatus('mainStatus', 'error', result.message);
+        return;
+    }
+
+    // ข้อมูลผู้ใช้ (ที่ไม่ได้ขึ้นกับ lastAccess)
+    document.getElementById('detailProfileImg').src = result.profileUrl;
+    document.getElementById('detailFullName').textContent = result.fullName;
+    document.getElementById('detailRegId').textContent = `รหัส : ${result.regId}`;
+    document.getElementById('detailPhone').textContent = `เบอร์โทรศัพท์ : ${result.phone}`;
+    document.getElementById('detailDepartment').textContent = result.department || '-';
+    document.getElementById('detailPosition').textContent = result.position || '-';
+    document.getElementById('detailCardType').textContent = result.cardType;
+    document.getElementById('detailAviationAreas').textContent = result.aviationAreas || '-';
+    document.getElementById('detailExpiry').textContent = result.expiryDate;
+    
+    // ** ❌ ลบบรรทัดนี้ออกไป: document.getElementById('detailEscort').textContent = last.escortName; **
+
+    // ข้อมูลการเข้าล่าสุด (ตอนนี้เป็นที่เดียวที่กำหนดค่า 'last' และใช้ 'lastAccess' ทั้งหมด)
+    if (result.lastAccess) {
+        const last = result.lastAccess; // <<-- ตัวแปร 'last' ถูกประกาศและใช้ภายในบล็อกนี้เท่านั้น
+        
+        // กำหนดค่า Escort Name ในส่วนนี้แทน
+        document.getElementById('detailEscort').textContent = last.escortName; 
+        
+        document.getElementById('detailTimestamp').textContent = last.timestamp;
+        document.getElementById('detailGate').textContent = last.gate;
+        
+        let equipmentList = [];
+        if (last.radio) equipmentList.push('วิทยุ');
+        if (last.mobile) equipmentList.push('มือถือ');
+        if (last.equipment) equipmentList.push('อุปกรณ์/เครื่องมือ');
+        
+        document.getElementById('detailEquipment').textContent = equipmentList.length > 0 ? equipmentList.join(', ') : '-';
+
+        document.getElementById('lastAccessContainer').classList.remove('text-error');
+    } else {
+        // กรณีที่ไม่พบบันทึก 'เข้า' ล่าสุด
+        document.getElementById('detailEscort').textContent = '-'; // ต้องกำหนดค่า Escort ที่นี่ด้วย
+        document.getElementById('detailTimestamp').textContent = 'ไม่พบบันทึกการเข้าล่าสุด';
+        document.getElementById('detailGate').textContent = '-';
+        document.getElementById('detailEquipment').textContent = '-';
+        document.getElementById('lastAccessContainer').classList.add('text-error');
+    }
+
+    showModal('detailModal');
+}
+
+function onUserDetailFailure(error) {
+    hideModal('loadingModal');
+    showStatus('mainStatus', 'error', 'เกิดข้อผิดพลาดในการดึงรายละเอียด: ' + error.message);
+}
+        
+        // =========================================================
+        // 5. INITIALIZATION
+        // =========================================================
+
+        const initializeDashboard = () => {
+            loadTotalUserCount();
+            // โหลดแท็บเริ่มต้น (Inside Users)
+            loadInsideUsers(); 
+        };
+
+        window.onload = initializeDashboard;
+
+        // =========================================================
+// 6. REPORT PRINTING LOGIC
+// =========================================================
+
+function printSearchReport() {
+    // 1. ตรวจสอบข้อมูลที่ถูกเก็บไว้
+    if (!window.lastSearchedLogs || window.lastSearchedLogs.length === 0) {
+        alert('ไม่พบข้อมูลบันทึกที่จะพิมพ์ กรุณาค้นหาใหม่อีกครั้ง');
+        return;
+    }
+
+    const logs = window.lastSearchedLogs;
+    const searchRegId = document.getElementById('searchRegId').value;
+    const searchDateFrom = document.getElementById('searchDateFrom').value;
+    const searchDateTo = document.getElementById('searchDateTo').value;
+    
+    // แสดง loading ในขณะที่กำลังดึงข้อมูลผู้ถูกค้นหา
+    showModal('loadingModal');
+
+    // 2. ดึงข้อมูลโปรไฟล์ผู้ถูกค้นหาเพื่อใช้ในหัวรายงาน
+    google.script.run
+        .withSuccessHandler(function(profile) {
+            hideModal('loadingModal');
+            generateAndPrintReport(logs, profile, searchRegId, searchDateFrom, searchDateTo);
+        })
+        .withFailureHandler(function(error) {
+            hideModal('loadingModal');
+            // ใช้ข้อมูลพื้นฐานถ้าดึงโปรไฟล์ไม่สำเร็จ
+            const basicProfile = { fullName: 'ไม่พบข้อมูล', department: '-', position: '-' };
+            generateAndPrintReport(logs, basicProfile, searchRegId, searchDateFrom, searchDateTo);
+            console.error('Failed to fetch user profile for report:', error);
+        })
+        .getUserByRegId(searchRegId); // ต้องมีฟังก์ชัน getUserByRegId ใน Code.gs
+
+}
+
+/**
+ * ฟังก์ชันสร้างและสั่งพิมพ์รายงาน
+ * @param {Array} logs - รายการบันทึกการเข้าออก
+ * @param {Object} profile - ข้อมูลโปรไฟล์ผู้ถูกค้นหา
+ * @param {string} regId - รหัสเจ้าหน้าที่
+ * @param {string} dateFrom - วันที่เริ่มต้นค้นหา (YYYY-MM-DD)
+ * @param {string} dateTo - วันที่สิ้นสุดค้นหา (YYYY-MM-DD)
+ */
+function generateAndPrintReport(logs, profile, regId, dateFrom, dateTo) {
+    
+    // ***********************************************
+    // 1. เพิ่มการแปลงรูปแบบวันที่ (DD/MM/YYYY) ตรงนี้
+    const displayDateFrom = formatDateTH(dateFrom);
+    const displayDateTo = formatDateTH(dateTo);
+    
+    // 3. สร้างเนื้อหา HTML สำหรับส่วนตาราง
+    let tableRows = '';
+    logs.forEach(log => {
+        const escortText = log.escortName ? log.escortName : '-';
+        tableRows += `
+            <tr>
+                <td>${log.timestamp}</td>
+                <td style="color: ${log.status === 'เข้า' ? 'green' : 'red'};">${log.status}</td>
+                <td>${log.gate}</td>
+                <td>${log.cardType}</td>
+                <td>${escortText}</td>
+            </tr>
+        `;
+    });
+
+    // 4. สร้างเนื้อหา HTML และ CSS สำหรับพิมพ์ (ปรับปรุงรูปแบบ)
+    const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>รายงานบันทึกการเข้าออก</title>
+            <style>
+                /* CSS สำหรับการพิมพ์ */
+                body { 
+                    font-family: Tahoma, 'TH Sarabun New', sans-serif; 
+                    font-size: 11pt; 
+                    padding: 30px; 
+                    line-height: 1.5;
+                }
+                .header-line { 
+                    border-bottom: 3px solid #000; 
+                    padding-bottom: 5px; 
+                    margin-bottom: 20px; 
+                }
+                h2 { 
+                    text-align: center; 
+                    margin: 0; 
+                    font-size: 16pt; 
+                }
+                .report-header {
+                    border: 1px solid #ccc;
+                    padding: 15px;
+                    margin-bottom: 20px;
+                    background-color: #f9f9f9;
+                }
+                .report-header p {
+                    margin: 0;
+                    padding: 2px 0;
+                }
+                table { 
+                    width: 100%; 
+                    border-collapse: collapse; 
+                    margin-top: 15px; 
+                }
+                th, td { 
+                    border: 1px solid #000; 
+                    padding: 8px; 
+                    text-align: left; 
+                    vertical-align: top;
+                }
+                th { 
+                    background-color: #e0e0e0; 
+                    text-align: center;
+                    font-weight: bold;
+                }
+                .footer-info {
+                    margin-top: 30px;
+                    border-top: 1px dashed #ccc;
+                    padding-top: 10px;
+                    font-size: 9pt;
+                    text-align: right;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header-line">
+                <h2>รายงานบันทึกการเข้าออกเขตพื้นที่ (Access Log Report)</h2>
+            </div>
+            
+            <div class="report-header">
+                <p><strong>ผู้ถูกค้นหา:</strong> ${profile.fullName || profile.regId || '-'}</p>
+                <p><strong>รหัสเจ้าหน้าที่:</strong> ${regId}</p>
+                <p><strong>หน่วยงาน/ตำแหน่ง:</strong> ${profile.department || '-'} / ${profile.position || '-'}</p>
+            </div>
+            
+            <div class="report-info">
+                <p><strong>ช่วงวันที่ค้นหา:</strong> ${displayDateFrom || 'เริ่มต้น'} ถึง ${displayDateTo || 'ปัจจุบัน'}</p>
+                <p><strong>จำนวนรายการที่พบ:</strong> ${logs.length} รายการ</p>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th width="25%">วันเวลาที่สแกน</th>
+                        <th width="10%">สถานะ</th>
+                        <th width="20%">จุดสแกน</th>
+                        <th width="20%">ประเภทบัตร</th>
+                        <th width="25%">ผู้รับรอง (Escort)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRows}
+                </tbody>
+            </table>
+
+            <div class="footer-info">
+                <p>วันที่ออกรายงาน: ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                <p>ออกโดย: ระบบบันทึกการเข้าออกเขตพื้นที่</p>
+            </div>
+        </body>
+        </html>
+    `;
+
+    // 5. เปิดหน้าต่างใหม่และสั่งพิมพ์
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// ตั้งค่า Autocomplete เมื่อ DOM โหลดเสร็จแล้ว
+$(function() {
+    // ต้องแน่ใจว่า ID ของช่องค้นหาคือ searchRegId
+    const $searchInput = $('#searchRegId'); 
+
+    $searchInput.autocomplete({
+        // minLength: 2, // เริ่มค้นหาเมื่อพิมพ์อย่างน้อย 2 ตัวอักษร
+        source: function(request, response) {
+            // เรียก Apps Script function ที่สร้างใหม่
+            google.script.run
+                .withSuccessHandler(function(suggestions) {
+                    // suggestions จะเป็น array ของ strings ที่ส่งกลับมาจาก Code.gs
+                    response(suggestions);
+                })
+                .withFailureHandler(function(error) {
+                    console.error("Autocomplete error:", error);
+                    response([]); // ส่ง array ว่างเมื่อเกิดข้อผิดพลาด
+                })
+                .getUserSuggestions(request.term); // ส่งคำที่กำลังพิมพ์ไปให้ Apps Script
+        },
+        select: function(event, ui) {
+            // เมื่อเลือกรายการแล้ว นำค่า RegId (ส่วนแรกของข้อความ) ไปใส่ในช่องค้นหา
+            // ค่าที่เลือกจะเป็น "รหัส - ชื่อ"
+            const selectedText = ui.item.value;
+            const regIdMatch = selectedText.match(/^(\w+)\s-\s/);
+            
+            if (regIdMatch && regIdMatch[1]) {
+                $searchInput.val(regIdMatch[1]); // ใส่เฉพาะรหัส
+            } else {
+                $searchInput.val(selectedText); // ถ้าไม่มีรูปแบบรหัส ให้ใส่ทั้งหมด
+            }
+            // ปล่อยให้ฟอร์มถูก Submit เมื่อผู้ใช้กดปุ่มเอง (ไม่ submit อัตโนมัติ)
+            return false; // ป้องกันการเปลี่ยนค่าในช่อง input เป็นค่าเริ่มต้น
+        }
+    })
+    // ปรับแต่งการแสดงผลรายการ Autocomplete ให้ดูดีขึ้น (ถ้าจำเป็น)
+    .autocomplete( "instance" )._renderItem = function( ul, item ) {
+      return $( "<li>" )
+        .append( `<div class='p-2 hover:bg-dark-border cursor-pointer'>${item.label}</div>` )
+        .appendTo( ul );
+    };
+});
+
+/**
+ * ฟังก์ชันสำหรับแปลงรูปแบบวันที่จาก YYYY-MM-DD เป็น DD/MM/YYYY
+ * @param {string} dateString - วันที่ในรูปแบบ YYYY-MM-DD
+ * @returns {string} วันที่ในรูปแบบ DD/MM/YYYY หรือข้อความว่าง
+ */
+function formatDateTH(dateString) {
+    if (!dateString) return '';
+    
+    // ตรวจสอบว่ารูปแบบเป็น YYYY-MM-DD หรือไม่
+    const dateMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    
+    if (dateMatch) {
+        // dateMatch[1] = YYYY, dateMatch[2] = MM, dateMatch[3] = DD
+        const year = dateMatch[1];
+        const month = dateMatch[2];
+        const day = dateMatch[3];
+        
+        return `${day}/${month}/${year}`;
+    }
+    
+    // หากไม่ใช่รูปแบบ YYYY-MM-DD ให้คืนค่าเดิม
+    return dateString; 
+}
+    </script>
+</body>
+</html>

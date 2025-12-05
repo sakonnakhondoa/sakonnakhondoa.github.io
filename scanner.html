@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <base target="_top">
+    <title>ระบบสแกนเข้า-ออกพื้นที่ (<?!= scanMode ?>)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+
+/* Hybrid Dark Airport Theme */
+:root {
+--color-dark-bg: #0F1115; /* Dark but readable */
+--color-dark-card: #181B21; /* Slightly lighter for contrast */
+--color-dark-border: #2A2D34;
+--color-primary: #50FF6B; /* Runway Green */
+--color-secondary: #4DA3FF; /* Taxiway Blue */
+--color-warning: #FFC857; /* Amber */
+--color-error: #FF3D51; /* Stop Bar Red */
+--text-light: #E6E9EF;
+}
+
+
+.dark {
+color-scheme: dark;
+font-family: 'Inter', sans-serif;
+background: linear-gradient(180deg, #0D0F12 0%, #121418 100%);
+color: var(--text-light);
+}
+
+
+.dark .bg-dark-bg { background-color: var(--color-dark-bg); }
+.dark .bg-dark-card { background-color: var(--color-dark-card); }
+.dark .border-dark-border { border-color: var(--color-dark-border); }
+
+
+.dark .text-primary { color: var(--color-primary); }
+.dark .text-secondary { color: var(--color-secondary); }
+.dark .text-warning { color: var(--color-warning); }
+.dark .text-error { color: var(--color-error); }
+
+
+.dark .bg-primary { background-color: var(--color-primary); }
+.dark .bg-secondary { background-color: var(--color-secondary); }
+.dark .bg-warning { background-color: var(--color-warning); }
+.dark .bg-error { background-color: var(--color-error); }
+
+
+/* Input Fields */
+.dark input,
+.dark select,
+.dark textarea {
+background-color: #1E2127;
+border: 1px solid var(--color-dark-border);
+color: var(--text-light);
+transition: 0.2s ease;
+}
+
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+border-color: var(--color-primary);
+box-shadow: 0 0 8px rgba(80, 255, 107, 0.4);
+}
+
+
+/* Buttons */
+.dark button.bg-primary {
+background-color: var(--color-primary);
+color: #000;
+font-weight: 700;
+box-shadow: 0 0 12px rgba(80, 255, 107, 0.4);
+transition: 0.25s;
+}
+
+/* เพิ่มสไตล์สำหรับปุ่มสี Warning/Exit */
+.dark button.bg-warning {
+    background-color: var(--color-warning);
+    color: #000;
+    font-weight: 700;
+    box-shadow: 0 0 12px rgba(255, 200, 87, 0.4);
+    transition: 0.25s;
+}
+
+/* เพิ่ม Custom Border Classes ที่ขาดหายไป */
+.dark .border-primary { border-color: var(--color-primary); }
+.dark .border-secondary { border-color: var(--color-secondary); }
+.dark .border-warning { border-color: var(--color-warning); }
+
+.dark button.bg-primary:hover {
+</style>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    </head>
+<body class="p-4 sm:p-8 dark:bg-dark-bg text-gray-200 min-h-screen">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center text-primary mb-2">SAKON NAKHON AIRPORT</h1>
+        <h2 class="text-2xl font-semibold text-center text-white mb-8">จุดสแกน: <?!= scanMode ?></h2>
+
+        <div id="reader-container" class="bg-dark-card p-6 rounded-xl shadow-2xl border border-dark-border mb-6">
+            <div id="reader"></div>
+            <div id="message" class="mt-4 p-3 rounded text-center text-sm font-medium hidden"></div>
+            <div class="flex justify-center mt-4 space-x-4">
+                <button id="startScanBtn" onclick="startScanning()" 
+                        class="px-6 py-3 bg-primary text-white rounded-lg shadow-md hover:bg-green-600 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m-2-2V9m0 6v3m0-8h3m-3 0H6m6 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    เริ่มสแกน
+                </button>
+                <button id="stopScanBtn" onclick="stopScanning()" 
+                        class="px-6 py-3 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 flex items-center hidden">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m-2-2V9m0 6v3m0-8h3m-3 0H6m6 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    หยุดสแกน
+                </button>
+                <button id="toggleCameraBtn" onclick="toggleCamera()" 
+                        class="px-6 py-3 bg-secondary text-white rounded-lg shadow-md hover:bg-blue-600 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.218A2 2 0 0110.42 5h3.16a2 2 0 011.664.89l.812 1.218A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    สลับกล้อง
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="resultModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex flex-col items-center justify-start min-h-screen p-4 overflow-y-auto">
+        <div id="modalContent" class="bg-dark-card p-6 rounded-xl shadow-2xl w-full max-w-lg mx-auto transform transition-all">
+            <div id="userInfoDisplay" class="text-center mb-6">
+                <h3 class="text-2xl font-bold text-primary mb-1" id="modalStatusTitle"></h3>
+                <img id="modalProfileImg" src="" alt="Profile" class="w-32 h-32 rounded-full object-cover border-4 border-primary mx-auto my-3">
+                <p class="text-xl font-semibold text-white" id="modalFullName"></p>
+                <p class="text-gray-400" id="modalRegId"></p>
+
+                <p class="text-base text-gray-300 mt-2" id="modalDepartment"></p>
+                <p class="text-base text-gray-300" id="modalPosition"></p>
+
+            <div id="modalAreaContainer" class="mt-3 p-2 mx-auto inline-block border-2 rounded-lg bg-dark-bg border-warning">
+                <p class="text-2xl font-extrabold text-warning" id="modalAviationArea"></p>
+            </div>
+                <p class="text-lg font-medium text-primary" id="modalCardType"></p>
+                <p class="text-sm text-yellow-400" id="modalExpiry"></p>
+                <p id="modalMessage" class="text-lg mt-3 font-medium text-white"></p>
+            </div>
+
+            <div id="itemCheckboxes" class="p-4 bg-gray-700 rounded-lg mb-6 hidden">
+                <p id="equipmentTitle" class="font-semibold text-lg mb-3 border-b border-dark-border pb-2 text-white">สิ่งของนำเข้า:</p>
+                <div class="flex flex-col space-y-2">
+                    <label class="inline-flex items-center text-white">
+                        <input type="checkbox" id="checkRadio" class="form-checkbox h-5 w-5 text-primary rounded border-gray-500 bg-gray-800">
+                        <span class="ml-2">วิทยุ</span>
+                    </label>
+                    <label class="inline-flex items-center text-white">
+                        <input type="checkbox" id="checkMobile" class="form-checkbox h-5 w-5 text-primary rounded border-gray-500 bg-gray-800">
+                        <span class="ml-2">มือถือ</span>
+                    </label>
+                    <label class="inline-flex items-center text-white">
+                        <input type="checkbox" id="checkEquipment" class="form-checkbox h-5 w-5 text-primary rounded border-gray-500 bg-gray-800">
+                        <span class="ml-2">อุปกรณ์/เครื่องมือ</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div id="escortSection" class="hidden text-center p-4 bg-red-800 bg-opacity-30 rounded-lg mb-6 border border-red-500">
+                <p class="font-bold text-red-400 mb-3">สแกนบัตร "ถาวร" เพื่อรับรอง (Escort)</p>
+                <div id="escort-reader-container" class="mb-4">
+                    <div id="escort-reader"></div> 
+                </div>
+                <div id="escortStatus" class="p-2 text-sm rounded mt-2 text-white"></div>
+                
+            </div>
+            
+            <div class="flex justify-between space-x-4">
+                <button id="cancelButton" onclick="cancelTransaction()" 
+                        class="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 font-semibold">
+                    ยกเลิก <br>(ไม่บันทึก)
+                </button>
+                <button id="escortScanButton" onclick="startEscortScan()" 
+                        class="flex-1 px-4 py-3 bg-secondary text-white rounded-lg shadow-md hover:bg-blue-600 font-semibold hidden">
+                    สแกนคนรับรอง (Escort)
+                </button>
+                <button id="confirmButton" onclick="confirmTransaction()" 
+                        class="flex-1 px-4 py-3 bg-primary text-white rounded-lg shadow-md hover:bg-green-600 font-semibold hidden">
+                    ยืนยัน <br>(บันทึก)
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center">
+        <div class="flex flex-col items-center bg-dark-card p-6 rounded-lg">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+            <p class="mt-4 text-white">กำลังบันทึกข้อมูล...</p>
+        </div>
+    </div>
+
+    <div id="finalResultModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-dark-card p-8 rounded-xl shadow-2xl w-full max-w-sm mx-auto transform transition-all text-center">
+            <div id="finalResultIcon" class="mb-4">
+                </div>
+            <h3 id="finalResultTitle" class="text-3xl font-bold mb-2 text-primary"></h3>
+            <p id="finalResultMessage" class="text-lg mb-6 text-white"></p>
+            <button onclick="closeResultModal()" 
+                    class="w-full px-6 py-3 bg-primary text-black rounded-lg shadow-md hover:opacity-80 font-semibold transition-colors duration-200">
+                ปิด (สแกนคนต่อไป)
+            </button>
+        </div>
+    </div>
+    <script>
+        // Global state variables
+        let html5QrCode;
+        let escortQrCode; 
+        let currentCameraId; // ใช้กล้องเดียวกัน
+        let cameraList = [];
+        let isScanning = false;
+        let isEscortScanning = false; 
+        let currentScanData = null; 
+        let currentEscortData = {}; 
+
+        const scanMode = '<?!= scanMode ?>';
+        
+        // =========================================================
+        // 1. HELPER FUNCTIONS (UI/UX)
+        // =========================================================
+
+        function showMessage(type, message) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.classList.remove('hidden', 'bg-green-800', 'bg-red-800', 'bg-blue-800', 'bg-yellow-800');
+            
+            let bgClass = '';
+            if (type === 'success') bgClass = 'bg-green-800';
+            else if (type === 'error') bgClass = 'bg-red-800';
+            else if (type === 'info') bgClass = 'bg-blue-800';
+            else if (type === 'warning') bgClass = 'bg-yellow-800';
+
+            msgDiv.classList.add(bgClass);
+            msgDiv.textContent = message;
+        }
+
+        function hideMessage() {
+            document.getElementById('message').classList.add('hidden');
+        }
+
+        function showModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function hideModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+
+        // =========================================================
+        // 2. SCANNER CONTROLS (MAIN)
+        // =========================================================
+
+        function initializeScanner() {
+            if (!Html5Qrcode) {
+                showMessage('error', 'Html5Qrcode not loaded.');
+                return;
+            }
+            Html5Qrcode.getCameras().then(devices => {
+                if (devices && devices.length) {
+                    cameraList = devices;
+                    // เลือกกล้องหลังเป็นค่าเริ่มต้น หรือตัวแรกที่พบ
+                    const backCamera = devices.find(d => d.label.toLowerCase().includes('back'));
+                    currentCameraId = backCamera ? backCamera.id : devices[0].id;
+                    showMessage('info', `พบกล้อง ${devices.length} ตัว. พร้อมเริ่มการสแกน.`);
+                    startScanning();
+                } else {
+                    showMessage('error', 'ไม่พบอุปกรณ์กล้อง');
+                }
+            }).catch(err => {
+                showMessage('error', 'ไม่สามารถเข้าถึงกล้องได้: ' + err.message);
+            });
+        }
+        
+        function startScanning() {
+            if (isScanning || !currentCameraId) return;
+
+            document.getElementById('reader-container').classList.remove('hidden');
+            
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            // Ensure no other scanner is running
+            if (escortQrCode && isEscortScanning) {
+                escortQrCode.stop().then(() => {
+                    isEscortScanning = false;
+                });
+            }
+
+
+            const config = { 
+                fps: 10, 
+                qrbox: {width: 350, height: 350},
+                formats: [Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.CODE_128]
+            };
+
+            html5QrCode.start(
+                currentCameraId, 
+                config, 
+                onScanSuccess,
+                (errorMessage) => { /* ignore minor errors */ }
+            )
+            .then(() => {
+                isScanning = true;
+                document.getElementById('startScanBtn').classList.add('hidden');
+                document.getElementById('stopScanBtn').classList.remove('hidden');
+                showMessage('info', 'กำลังสแกน... กรุณาหันกล้องไปที่รหัส');
+            })
+            .catch(err => {
+                isScanning = false;
+                showMessage('error', 'เกิดข้อผิดพลาดในการเปิดกล้อง: ' + err.message);
+                document.getElementById('startScanBtn').classList.remove('hidden');
+                document.getElementById('stopScanBtn').classList.add('hidden');
+            });
+        }
+
+        function stopScanning() {
+            if (!isScanning || !html5QrCode) return;
+            
+            html5QrCode.stop().then(() => {
+                isScanning = false;
+                document.getElementById('startScanBtn').classList.remove('hidden');
+                document.getElementById('stopScanBtn').classList.add('hidden');
+            }).catch(err => {
+                console.error("Failed to stop main scanner:", err);
+            });
+        }
+        
+        function toggleCamera() {
+            if (cameraList.length <= 1) {
+                showMessage('warning', 'มีกล้องเพียงตัวเดียว ไม่สามารถสลับได้');
+                return;
+            }
+
+            stopScanning(); // หยุดกล้องปัจจุบัน
+            
+            const currentIndex = cameraList.findIndex(d => d.id === currentCameraId);
+            const nextIndex = (currentIndex + 1) % cameraList.length;
+            currentCameraId = cameraList[nextIndex].id;
+            
+            showMessage('info', `สลับไปใช้กล้อง: ${cameraList[nextIndex].label}.`);
+            
+            // รอเล็กน้อยก่อนเริ่มสแกนใหม่
+            setTimeout(startScanning, 500); 
+        }
+
+        // =========================================================
+        // 3. SCAN LOGIC (Main Scan)
+        // =========================================================
+
+        function onScanSuccess(decodedText, decodedResult) {
+            if (!isScanning) return;
+            
+            stopScanning(); 
+            
+            if (decodedText && decodedText.length > 0) {
+                showMessage('info', `สแกนสำเร็จ: ${decodedText}. กำลังตรวจสอบข้อมูล...`);
+                // ใช้ UpperCase เพื่อให้ตรงกับการบันทึกใน Google Sheet
+                google.script.run
+                    .withSuccessHandler(onUserScanSuccess)
+                    .withFailureHandler(onScanFailure)
+                    .getUserForScan(decodedText.trim().toUpperCase()); 
+            } else {
+                showMessage('error', 'ไม่สามารถอ่านรหัสได้ กรุณาลองใหม่อีกครั้ง');
+                startScanning(); 
+            }
+        }
+        
+        function onUserScanSuccess(result) {
+            hideMessage();
+            if (!result.success) {
+                showMessage('error', `ข้อผิดพลาด: ${result.message}`);
+                // ถ้ามีข้อมูลผู้ใช้แต่หมดอายุ ให้แสดงข้อมูล
+                if (result.data) {
+                    // ... (แสดงผลใน Modal ได้ถ้าต้องการ)
+                }
+                setTimeout(startScanning, 3000); // เริ่มสแกนใหม่หลัง 3 วินาที
+                return;
+            }
+
+            currentScanData = result;
+            currentEscortData = result.escortDataForCheckout || {}; 
+            
+            const isCheckIn = result.newStatus === 'เข้า';
+            const requiresEscort = result.requiresEscort;
+            
+            // ********** START: Dynamic UI Color Change for Check-in (Primary/Green) vs Check-out (Warning/Amber) **********
+            const statusColorClass = isCheckIn ? 'text-primary' : 'text-warning'; // Green for IN, Amber for OUT
+            const statusBorderClass = isCheckIn ? 'border-primary' : 'border-warning';
+            const confirmBgClass = isCheckIn ? 'bg-primary' : 'bg-warning';
+            const confirmHoverClass = isCheckIn ? 'hover:bg-green-600' : 'hover:bg-yellow-600'; 
+            
+            // Populate Modal
+            document.getElementById('modalStatusTitle').textContent = `ยืนยันการ${result.newStatus}พื้นที่`;
+
+            // 1. เปลี่ยนสีหัวข้อสถานะ (Title)
+            const titleElement = document.getElementById('modalStatusTitle');
+            titleElement.classList.remove('text-primary', 'text-warning'); 
+            titleElement.classList.add(statusColorClass);
+            
+            document.getElementById('modalProfileImg').src = result.data.profileUrl;
+            
+            // 2. เปลี่ยนสีขอบรูปโปรไฟล์ (Profile Border)
+            const imgElement = document.getElementById('modalProfileImg');
+            imgElement.classList.remove('border-primary', 'border-warning'); 
+            imgElement.classList.add(statusBorderClass);
+            
+            document.getElementById('modalFullName').textContent = result.data.fullName;
+            document.getElementById('modalRegId').textContent = `รหัส: ${result.data.regId}`;
+
+            // ******* โค้ดที่เพิ่ม: กำหนดค่า 3 ฟิลด์ใหม่ *******
+            document.getElementById('modalDepartment').textContent = `หน่วยงาน/สังกัด: ${result.data.department || 'ไม่ระบุ'}`;
+            document.getElementById('modalPosition').textContent = `ตำแหน่ง: ${result.data.position || 'ไม่ระบุ'}`;
+            document.getElementById('modalAviationArea').textContent = result.data.aviationAreas || 'N/A';
+            
+            // 4. เปลี่ยนสีขอบและข้อความเขตพื้นที่ให้ตรงกับสถานะ
+            const areaContainer = document.getElementById('modalAreaContainer');
+            areaContainer.classList.remove('border-primary', 'border-warning'); 
+            areaContainer.classList.add(statusBorderClass); 
+
+            const areaText = document.getElementById('modalAviationArea');
+            areaText.classList.remove('text-primary', 'text-warning'); 
+            areaText.classList.add(statusColorClass);
+            // *******************************************************
+
+            // 3. เปลี่ยนสีข้อความประเภทบัตร (Card Type)
+            const cardTypeElement = document.getElementById('modalCardType');
+            cardTypeElement.classList.remove('text-primary', 'text-warning');
+            cardTypeElement.classList.add(statusColorClass);
+            
+            document.getElementById('modalCardType').textContent = `ประเภทบัตร: ${result.data.cardType}`;
+            document.getElementById('modalExpiry').textContent = `วันหมดอายุ: ${result.data.expiryDate}`;
+            document.getElementById('modalMessage').textContent = `สถานะปัจจุบัน: ${result.currentStatus} -> **${result.newStatus}**`;
+            
+            // 4. เปลี่ยนสีปุ่มยืนยัน (Confirm Button)
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.classList.remove('bg-primary', 'bg-warning', 'hover:bg-green-600', 'hover:bg-yellow-600'); 
+            confirmButton.classList.add(confirmBgClass, confirmHoverClass);
+
+            // ********** END: Dynamic UI Color Change **********
+            
+            // Reset checkboxes
+            document.getElementById('checkRadio').checked = false;
+            document.getElementById('checkMobile').checked = false;
+            document.getElementById('checkEquipment').checked = false;
+
+            // ***** เริ่มโค้ดสำหรับจัดการ Checkbox อุปกรณ์ *****
+            const equipmentSection = document.getElementById('itemCheckboxes');
+            const equipmentTitle = document.getElementById('equipmentTitle');
+            
+            // 1. ทำให้ส่วนอุปกรณ์แสดงเสมอ 
+            equipmentSection.classList.remove('hidden'); 
+
+            if (isCheckIn) {
+                // Flow สำหรับสถานะ 'เข้า': ต้องติ๊กใหม่ทั้งหมด
+                equipmentTitle.textContent = 'ระบุอุปกรณ์ที่นำเข้า';
+                equipmentSection.classList.replace('bg-blue-800', 'bg-gray-700'); 
+            } else { 
+                // Flow สำหรับสถานะ 'ออก': Pre-fill ข้อมูล 
+                equipmentTitle.textContent = 'ยืนยันอุปกรณ์ที่นำออก';
+                equipmentSection.classList.replace('bg-gray-700', 'bg-blue-800'); 
+
+                // ดึงข้อมูลอุปกรณ์ล่าสุดที่เคยบันทึกตอน 'เข้า' มาแสดง (Pre-fill)
+                if (result.latestEquipmentData) {
+                    document.getElementById('checkRadio').checked = result.latestEquipmentData.radio;
+                    document.getElementById('checkMobile').checked = result.latestEquipmentData.mobile;
+                    document.getElementById('checkEquipment').checked = result.latestEquipmentData.equipment;
+                }
+            }
+            // ***** สิ้นสุดโค้ดสำหรับจัดการ Checkbox อุปกรณ์ *****
+
+            //document.getElementById('itemCheckboxes').classList.toggle('hidden', !isCheckIn);
+
+            // Reset Escort Section UI
+            document.getElementById('escortSection').classList.add('hidden');
+            document.getElementById('escortStatus').innerHTML = '';
+            document.getElementById('escortSection').classList.replace('bg-blue-800', 'bg-red-800');
+            document.getElementById('escortSection').classList.replace('border-blue-500', 'border-red-500');
+
+            document.getElementById('cancelButton').classList.add('flex-1');
+            document.getElementById('cancelButton').classList.remove('w-1/2');
+
+
+            if (isCheckIn && requiresEscort) {
+                // Flow 1: Requires Escort (Temporary Card Check-in)
+                document.getElementById('escortScanButton').classList.remove('hidden');
+                document.getElementById('confirmButton').classList.add('hidden');
+                document.getElementById('escortSection').classList.remove('hidden');
+            } else {
+                // Flow 2: Standard Check-in (Non-Temporary) or Check-out
+                document.getElementById('escortScanButton').classList.add('hidden');
+                document.getElementById('confirmButton').classList.remove('hidden');
+                
+                 if (result.newStatus === 'ออก' && result.data.cardType === 'ชั่วคราว' && result.escortDataForCheckout.escortName) {
+                    document.getElementById('escortSection').classList.remove('hidden');
+                    document.getElementById('escortStatus').innerHTML = `
+                        <p class="text-white font-semibold">ผู้รับรอง (ตอนเข้า): ${result.escortDataForCheckout.escortName}</p>
+                        <p class="text-sm text-gray-400">การสแกนออกไม่ต้องมีการรับรองเพิ่มเติม</p>
+                    `;
+                    document.getElementById('escortSection').classList.replace('bg-red-800', 'bg-blue-800'); 
+                    document.getElementById('escortSection').classList.replace('border-red-500', 'border-blue-500');
+                } else {
+                    document.getElementById('escortSection').classList.add('hidden');
+                }
+            }
+            document.getElementById('reader-container').classList.add('hidden');
+            showModal('resultModal');
+        }
+
+        function onScanFailure(error) {
+            hideModal('loadingModal');
+            showMessage('error', 'เกิดข้อผิดพลาดในการตรวจสอบข้อมูล: ' + error.message);
+            currentScanData = null;
+            currentEscortData = {};
+            setTimeout(startScanning, 3000);
+        }
+        
+        // =========================================================
+        // 4. ESCORT LOGIC
+        // =========================================================
+
+        function startEscortScan() {
+            if (isEscortScanning) return;
+            
+            document.getElementById('escortScanButton').classList.add('hidden');
+            document.getElementById('escortStatus').textContent = 'กำลังรอสแกนคนรับรอง...';
+            document.getElementById('escort-reader-container').innerHTML = '<div id="escort-reader"></div>'; // Re-render div
+
+            isEscortScanning = true;
+            
+            escortQrCode = new Html5Qrcode("escort-reader");
+            
+            const config = { fps: 10, qrbox: {width: 300, height: 300}, formats: [Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.CODE_128] };
+            
+            // ใช้ currentCameraId เพื่อใช้กล้องเดียวกับสแกนหลัก
+            escortQrCode.start(
+                currentCameraId, 
+                config, 
+                onEscortScanSuccess,
+                (errorMessage) => { /* ignore minor errors */ }
+            )
+            .catch(err => {
+                document.getElementById('escortStatus').textContent = 'เกิดข้อผิดพลาดในการเปิดกล้อง Escort: ' + err.message;
+                isEscortScanning = false;
+                document.getElementById('escortScanButton').classList.remove('hidden');
+            });
+        }
+
+        function onEscortScanSuccess(escortDecodedText) {
+            if (!isEscortScanning || !escortQrCode) return;
+            
+            escortQrCode.stop().then(() => {
+                isEscortScanning = false;
+                document.getElementById('escortStatus').textContent = 'สแกนคนรับรองสำเร็จ. กำลังตรวจสอบ...';
+
+                google.script.run
+                    .withSuccessHandler(onEscortCheckSuccess)
+                    .withFailureHandler(onEscortCheckFailure)
+                    .checkEscort(escortDecodedText.trim().toUpperCase()); 
+
+            }).catch(err => {
+                console.error("Failed to stop escort scanner:", err);
+                isEscortScanning = false;
+            });
+        }
+
+        function onEscortCheckSuccess(result) {
+    // ล้าง div สแกน Escort
+    document.getElementById('escort-reader-container').innerHTML = '<div id="escort-reader"></div>'; 
+    
+    if (result.success) {
+        currentEscortData = result.escortData; 
+        
+        // คำนวณโควตาที่จะเหลือหลังจากรับรองคนนี้
+        const currentCount = result.escortData.escortCount;
+        const maxQuota = result.escortData.quotaMax || 5;
+        const nextCount = currentCount + 1;
+
+        // แสดงผลสีเขียวและบอกยอดโควตา
+        document.getElementById('escortStatus').innerHTML = `
+            <div class="bg-green-900 bg-opacity-40 p-3 rounded border border-green-500 text-left">
+                <p class="text-green-400 font-bold text-lg">✅ รับรองได้</p>
+                <p class="text-white">ผู้รับรอง: <span class="font-semibold">${result.escortData.escortName}</span></p>
+                <p class="text-gray-300 text-sm">รหัส: ${result.escortData.escortRegId}</p>
+                <hr class="border-gray-600 my-2">
+                <p class="text-yellow-400 font-semibold">
+                   โควตาการรับรอง: ${currentCount}/${maxQuota} ➝ <span class="text-white text-lg">${nextCount}/${maxQuota}</span>
+                </p>
+            </div>
+        `;
+        
+        // เปิดปุ่มยืนยัน
+        document.getElementById('confirmButton').classList.remove('hidden');
+        document.getElementById('escortScanButton').classList.add('hidden');
+        document.getElementById('cancelButton').classList.remove('flex-1'); 
+        document.getElementById('cancelButton').classList.add('w-1/2');
+
+    } else {
+        // กรณีโควตาเต็ม หรือบัตรผิดประเภท
+        document.getElementById('escortStatus').innerHTML = `
+            <div class="bg-red-900 bg-opacity-40 p-3 rounded border border-red-500">
+                <p class="text-red-400 font-bold text-lg">⛔ ${result.message}</p>
+            </div>
+        `;
+        document.getElementById('escortScanButton').classList.remove('hidden'); 
+        document.getElementById('escortScanButton').innerText = "สแกนคนรับรองใหม่"; // เปลี่ยนข้อความปุ่มเล็กน้อย
+        document.getElementById('confirmButton').classList.add('hidden');
+        document.getElementById('cancelButton').classList.add('flex-1');
+        document.getElementById('cancelButton').classList.remove('w-1/2');
+    }
+}
+        
+        function onEscortCheckFailure(error) {
+            document.getElementById('escort-reader-container').innerHTML = '<div id="escort-reader"></div>';
+            document.getElementById('escortStatus').textContent = 'เกิดข้อผิดพลาดในการตรวจสอบคนรับรอง: ' + error.message;
+            document.getElementById('escortScanButton').classList.remove('hidden'); 
+            document.getElementById('confirmButton').classList.add('hidden');
+            document.getElementById('cancelButton').classList.add('flex-1');
+            document.getElementById('cancelButton').classList.remove('w-1/2');
+        }
+
+        // =========================================================
+        // 5. TRANSACTION FINALIZATION
+        // =========================================================
+
+        function confirmTransaction() {
+            if (!currentScanData) return;
+            
+            const radio = document.getElementById('checkRadio').checked;
+            const mobile = document.getElementById('checkMobile').checked;
+            const equipment = document.getElementById('checkEquipment').checked;
+            
+            if (currentScanData.requiresEscort && !currentEscortData.escortRegId) {
+                alert("กรุณาสแกนคนรับรอง (Escort) ก่อนยืนยันการบันทึก");
+                return;
+            }
+
+            showModal('loadingModal'); 
+            hideModal('resultModal');
+            
+            google.script.run
+                .withSuccessHandler(onRecordSuccess)
+                .withFailureHandler(onRecordFailure)
+                .recordAccess(
+                    currentScanData.data.regId, 
+                    currentScanData.newStatus, 
+                    scanMode,
+                    radio,
+                    mobile,
+                    equipment,
+                    currentEscortData 
+                );
+        }
+
+        function cancelTransaction() {
+            hideModal('resultModal');
+            currentScanData = null;
+            currentEscortData = {};
+            // Restore escort section class
+            document.getElementById('escortSection').classList.replace('bg-blue-800', 'bg-red-800');
+            document.getElementById('escortSection').classList.replace('border-blue-500', 'border-red-500');
+            showMessage('warning', 'ยกเลิกการบันทึกข้อมูลแล้ว. เริ่มสแกนใหม่...');
+            startScanning(); 
+        }
+
+        // =========================================================
+        // 6. RESULT MODAL CONTROL (NEW & FIXED)
+        // =========================================================
+
+        function closeResultModal() {
+            hideModal('finalResultModal');
+            currentScanData = null;
+            currentEscortData = {};
+            // Restore escort section class in case of previous failure
+            document.getElementById('escortSection').classList.replace('bg-blue-800', 'bg-red-800');
+            document.getElementById('escortSection').classList.replace('border-blue-500', 'border-red-500');
+            // เริ่มสแกนใหม่ทันทีตามที่ต้องการ
+            startScanning(); 
+        }
+
+        function onRecordSuccess(result) {
+            hideModal('loadingModal');
+            
+            // **FIX: ดึงข้อมูลจาก currentScanData แทน result (เพื่อป้องกัน undefined)**
+            const userFullName = currentScanData ? currentScanData.data.fullName : 'ข้อมูลผู้ใช้';
+            const userNewStatus = currentScanData ? currentScanData.newStatus : 'บันทึก';
+            
+            // 1. Setup UI for Success
+            document.getElementById('finalResultIcon').innerHTML = `
+                <svg class="w-16 h-16 text-primary mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2m4-4l-4 4m0 0l-4-4m4 4V7"></path></svg>
+            `;
+            document.getElementById('finalResultTitle').textContent = 'บันทึกเรียบร้อยแล้ว';
+            document.getElementById('finalResultTitle').classList.remove('text-error');
+            document.getElementById('finalResultTitle').classList.add('text-primary');
+            
+            // ใช้ตัวแปรที่ดึงมาจาก currentScanData
+            document.getElementById('finalResultMessage').textContent = `${userFullName} บันทึกการ${userNewStatus}สำเร็จ!`;
+
+            // 2. Change button color to success (primary/green)
+            const closeBtn = document.querySelector('#finalResultModal button');
+            closeBtn.classList.remove('bg-red-600', 'text-white', 'hover:bg-red-700');
+            closeBtn.classList.add('bg-primary', 'text-black', 'hover:opacity-80');
+            
+            // 3. Show the new modal
+            showModal('finalResultModal');
+        }
+
+        function onRecordFailure(error) {
+            hideModal('loadingModal');
+
+            // **FIX: ดึงข้อมูลสถานะจาก currentScanData เพื่อใช้ในข้อความผิดพลาด**
+            const userNewStatus = currentScanData ? currentScanData.newStatus : 'บันทึก';
+
+            // 1. Setup UI for Error
+            document.getElementById('finalResultIcon').innerHTML = `
+                <svg class="w-16 h-16 text-error mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            `;
+            document.getElementById('finalResultTitle').textContent = 'ระบบผิดพลาด';
+            document.getElementById('finalResultTitle').classList.remove('text-primary');
+            document.getElementById('finalResultTitle').classList.add('text-error');
+            
+            // แสดงรายละเอียดข้อผิดพลาดควบคู่กันไปตามที่ร้องขอ
+            document.getElementById('finalResultMessage').textContent = `กรุณาติดต่อผู้ดูแลระบบ. การ${userNewStatus}ไม่สำเร็จ. ข้อผิดพลาด: ${error.message}`;
+
+            // 2. Change button color to error (red)
+            const closeBtn = document.querySelector('#finalResultModal button');
+            closeBtn.classList.remove('bg-primary', 'text-black', 'hover:opacity-80');
+            closeBtn.classList.add('bg-red-600', 'text-white', 'hover:bg-red-700');
+            
+            // 3. Show the new modal
+            showModal('finalResultModal');
+        }
+
+        // Initialize on load
+        window.onload = initializeScanner;
+    </script>
+</body>
+</html>

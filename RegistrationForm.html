@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <base target="_top">
+    <title>ระบบลงทะเบียนผู้ใช้งาน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+
+/* Hybrid Dark Airport Theme */
+:root {
+--color-dark-bg: #0F1115; /* Dark but readable */
+--color-dark-card: #181B21; /* Slightly lighter for contrast */
+--color-dark-border: #2A2D34;
+--color-primary: #50FF6B; /* Runway Green */
+--color-secondary: #4DA3FF; /* Taxiway Blue */
+--color-warning: #FFC857; /* Amber */
+--color-error: #FF3D51; /* Stop Bar Red */
+--text-light: #E6E9EF;
+}
+
+
+.dark {
+color-scheme: dark;
+font-family: 'Inter', sans-serif;
+background: linear-gradient(180deg, #0D0F12 0%, #121418 100%);
+color: var(--text-light);
+}
+
+
+.dark .bg-dark-bg { background-color: var(--color-dark-bg); }
+.dark .bg-dark-card { background-color: var(--color-dark-card); }
+.dark .border-dark-border { border-color: var(--color-dark-border); }
+
+
+.dark .text-primary { color: var(--color-primary); }
+.dark .text-secondary { color: var(--color-secondary); }
+.dark .text-warning { color: var(--color-warning); }
+.dark .text-error { color: var(--color-error); }
+
+
+.dark .bg-primary { background-color: var(--color-primary); }
+.dark .bg-secondary { background-color: var(--color-secondary); }
+.dark .bg-warning { background-color: var(--color-warning); }
+.dark .bg-error { background-color: var(--color-error); }
+
+
+/* Input Fields */
+.dark input,
+.dark select,
+.dark textarea {
+background-color: #1E2127;
+border: 1px solid var(--color-dark-border);
+color: var(--text-light);
+transition: 0.2s ease;
+}
+
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+border-color: var(--color-primary);
+box-shadow: 0 0 8px rgba(80, 255, 107, 0.4);
+}
+
+
+/* Buttons */
+.dark button.bg-primary {
+background-color: var(--color-primary);
+color: #000;
+font-weight: 700;
+box-shadow: 0 0 12px rgba(80, 255, 107, 0.4);
+transition: 0.25s;
+}
+
+
+.dark button.bg-primary:hover {
+</style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="p-4 sm:p-8 dark:bg-dark-bg text-gray-200">
+
+  <div class="max-w-3xl mx-auto bg-dark-card p-6 rounded-xl shadow-2xl border border-dark-border">
+    <h1 class="text-3xl font-bold text-center text-primary mb-8">SAKON NAKHON AIRPORT</h1>
+    <h1 class="text-3xl font-bold text-center text-primary mb-8">ลงทะเบียนเข้าใช้งานพื้นที่ปฏิบัติงาน</h1>
+
+    
+
+    <form id="registrationForm" class="space-y-6">
+        <div>
+            <label class="block text-sm font-medium">URL รูปโปรไฟล์ <span class="text-red-500">*</span></label>
+            <input type="url" id="profileUrl" name="profileUrl" oninput="showPreview()" required
+                class="mt-1 block w-full rounded-md shadow-sm p-3 border-dark-border focus:ring-primary focus:border-primary">
+            <div class="mt-4 flex justify-center">
+                <img id="profilePreview" src="https://placehold.co/100x100/333/fff?text=No+Img" alt="Profile Preview" class="w-32 h-32 rounded-full object-cover border-4 border-dark-border">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="fullName" class="block text-sm font-medium">ชื่อ-นามสกุล <span class="text-red-500">*</span></label>
+                <input type="text" id="fullName" name="fullName" required class="mt-1 block w-full rounded-md shadow-sm p-3">
+            </div>
+            <div>
+                <label for="regId" class="block text-sm font-medium">รหัสเจ้าหน้าที่ <span class="text-red-500">*</span></label>
+                <input type="text" id="regId" name="regId" required class="mt-1 block w-full rounded-md shadow-sm p-3 uppercase tracking-wider">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="department" class="block text-sm font-medium">หน่วยงาน/สังกัด <span class="text-red-500">*</span></label>
+                <input type="text" id="department" name="department" required class="mt-1 block w-full rounded-md shadow-sm p-3">
+            </div>
+            <div>
+                <label for="position" class="block text-sm font-medium">ตำแหน่ง <span class="text-red-500">*</span></label>
+                <input type="text" id="position" name="position" required class="mt-1 block w-full rounded-md shadow-sm p-3">
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label for="cardType" class="block text-sm font-medium">ประเภทบัตร <span class="text-red-500">*</span></label>
+                <select id="cardType" name="cardType" required class="mt-1 block w-full rounded-md shadow-sm p-3">
+                    <option value="" disabled selected>เลือกประเภทบัตร</option>
+                    <option value="ถาวร">ถาวร</option>
+                    <option value="ชั่วคราว">ชั่วคราว</option>
+                    <option value="VIP">VIP</option>
+                    <option value="EMS">EMS</option>
+                    <option value="เยี่ยมชม">เยี่ยมชม</option>
+                </select>
+            </div>
+            <div>
+                <label for="phone" class="block text-sm font-medium">เบอร์โทรศัพท์ <span class="text-red-500">*</span></label>
+                <input type="tel" id="phone" name="phone" required class="mt-1 block w-full rounded-md shadow-sm p-3">
+            </div>
+             <div>
+                <label for="driverLicenseNo" class="block text-sm font-medium">เลขที่ (บัตร)</label>
+                <input type="text" id="driverLicenseNo" name="driverLicenseNo" class="mt-1 block w-full rounded-md shadow-sm p-3">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="aviationAreas" class="block text-sm font-medium">หมายเลขเขตพื้นที่</label>
+                <input type="text" id="aviationAreas" name="aviationAreas" class="mt-1 block w-full rounded-md shadow-sm p-3">
+            </div>
+            <div>
+                <label for="expiryDate" class="block text-sm font-medium">วันหมดอายุ <span class="text-red-500">*</span></label>
+                <input type="date" id="expiryDate" name="expiryDate" required class="mt-1 block w-full rounded-md shadow-sm p-3">
+            </div>
+        </div>
+        
+        <div>
+            <label for="note" class="block text-sm font-medium">หมายเหตุ</label>
+            <textarea id="note" name="note" rows="3" class="mt-1 block w-full rounded-md shadow-sm p-3"></textarea>
+        </div>
+
+        <div id="statusMessage" class="p-3 rounded mb-4 hidden font-medium"></div>
+
+        <button type="submit" id="submitButton"
+            class="w-full px-4 py-3 bg-primary text-white rounded-lg shadow-md hover:bg-green-600 font-bold flex items-center justify-center transition duration-150">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            ลงทะเบียน
+        </button>
+        <div id="loading" class="text-center mt-3 hidden">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p class="text-sm mt-2">กำลังส่งข้อมูล...</p>
+        </div>
+    </form>
+  </div>
+
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-lg mx-auto text-center text-gray-800">
+            <h3 class="text-3xl font-bold text-primary mb-4">ลงทะเบียนสำเร็จ!</h3>
+            <p class="text-lg mb-2">รหัสเจ้าหน้าที่:</p>
+            <p id="modalRegId" class="text-3xl font-extrabold text-gray-900 mb-6"></p>
+
+            <div class="flex flex-col items-center space-y-4">
+                <div>
+                    <p class="font-semibold mb-2">QR Code</p>
+                    <div id="qrcode" class="border border-gray-300 p-2 mx-auto"></div>
+                </div>
+                <div>
+                    <p class="font-semibold mb-2">Bar Code</p>
+                    <img id="barcodeImg" src="" alt="Bar Code" class="mx-auto border border-gray-300 p-2">
+                </div>
+            </div>
+            
+            <p class="text-sm text-gray-500 mt-6">กรุณาบันทึกรหัสและโค้ดเพื่อใช้งานระบบสแกน</p>
+            <button onclick="document.getElementById('successModal').classList.add('hidden')"
+                    class="mt-6 px-6 py-3 bg-primary text-white rounded-lg shadow-md hover:bg-green-600 font-semibold">
+                ปิด
+            </button>
+        </div>
+    </div>
+
+  <script>
+    // Global function to display image preview
+    function showPreview() {
+        const url = document.getElementById('profileUrl').value;
+        const preview = document.getElementById('profilePreview');
+        if (url) {
+            preview.src = url;
+        } else {
+            preview.src = "https://placehold.co/100x100/333/fff?text=No+Img";
+        }
+    }
+
+    // Helper function: Status message handling
+    function showStatus(type, message) {
+        const statusDiv = document.getElementById('statusMessage');
+        statusDiv.classList.remove('hidden', 'bg-red-800', 'bg-green-800');
+        statusDiv.classList.add(type === 'success' ? 'bg-green-800' : 'bg-red-800');
+        statusDiv.textContent = message;
+    }
+
+    // Helper function: Loading state handling
+    function resetFormState() {
+        document.getElementById('submitButton').classList.remove('hidden');
+        document.getElementById('loading').classList.add('hidden');
+    }
+
+    const form = document.getElementById('registrationForm');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        document.getElementById('submitButton').classList.add('hidden');
+        document.getElementById('loading').classList.remove('hidden');
+        
+        const formData = {
+            profileUrl: document.getElementById('profileUrl').value,
+            regId: document.getElementById('regId').value.trim().toUpperCase(), 
+            fullName: document.getElementById('fullName').value,
+            department: document.getElementById('department').value,
+            position: document.getElementById('position').value,
+            phone: document.getElementById('phone').value,
+            driverLicenseNo: document.getElementById('driverLicenseNo').value,
+            aviationAreas: document.getElementById('aviationAreas').value,
+            expiryDate: document.getElementById('expiryDate').value,
+            cardType: document.getElementById('cardType').value, 
+            note: document.getElementById('note').value
+        };
+
+        google.script.run
+            .withSuccessHandler(onRegistrationSuccess)
+            .withFailureHandler(onRegistrationFailure)
+            .processRegistration(formData);
+    });
+
+    function onRegistrationSuccess(result) {
+        resetFormState();
+        if (result.success) {
+            // Show Modal with QR/Barcode
+            document.getElementById('modalRegId').textContent = result.regId;
+            document.getElementById('barcodeImg').src = result.barcodeUrl;
+
+            // Generate QR Code using qrcode.js
+            const qrcodeContainer = document.getElementById('qrcode');
+            qrcodeContainer.innerHTML = ''; // Clear previous
+            new QRCode(qrcodeContainer, {
+                text: result.regId,
+                width: 250,
+                height: 250,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            document.getElementById('successModal').classList.remove('hidden');
+            document.getElementById('registrationForm').reset();
+            showPreview(); // Reset image preview
+            showStatus('success', `ลงทะเบียนสำเร็จ! รหัส ${result.regId} ถูกส่งไปยังอีเมล์แอดมินแล้ว`);
+
+        } else {
+            showStatus('error', 'การลงทะเบียนไม่สำเร็จ: ' + result.message);
+        }
+    }
+
+    function onRegistrationFailure(error) {
+        resetFormState();
+        showStatus('error', 'เกิดข้อผิดพลาดในการเชื่อมต่อระบบ: ' + error.message);
+    }
+  </script>
+</body>
+</html>

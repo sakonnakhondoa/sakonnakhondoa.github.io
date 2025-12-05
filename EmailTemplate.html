@@ -1,0 +1,40 @@
+<div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden;">
+    <div style="background-color: #3b82f6; color: white; padding: 20px; text-align: center;">
+      <h2 style="margin: 0;">การลงทะเบียนเจ้าหน้าที่สำเร็จแล้ว</h2>
+      <p style="margin: 5px 0 0;">ท่าอากาศยานสกลนคร</p>
+    </div>
+    <div style="padding: 20px; color: #333333;">
+      <p>เรียน ผู้ดูแลระบบ</p>
+      <p>มีการลงทะเบียนเจ้าหน้าที่ใหม่ในระบบเรียบร้อยแล้ว รายละเอียดดังต่อไปนี้:</p>
+      
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0; border-collapse: collapse;">
+        <tr>
+          <td colspan="2" style="text-align: center; padding-bottom: 20px;">
+            <img src="<?= formData.profileUrl ?>" onerror="this.onerror=null;this.src='https://placehold.co/150x150/cccccc/333333?text=NO+IMAGE';" alt="รูปโปรไฟล์" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 3px solid #3b82f6;">
+          </td>
+        </tr>
+        <tr><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc; font-weight: bold;">รหัสเจ้าหน้าที่:</td><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc;"><?= formData.regId ?></td></tr>
+        <tr><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc; font-weight: bold;">ชื่อ-นามสกุล:</td><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc;"><?= formData.fullname ?></td></tr>
+        <tr><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc; font-weight: bold;">หน่วยงาน/สังกัด:</td><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc;"><?= formData.department ?></td></tr>
+        <tr><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc; font-weight: bold;">ตำแหน่ง:</td><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc;"><?= formData.position ?></td></tr>
+        <tr><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc; font-weight: bold;">เบอร์โทรศัพท์:</td><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc;"><?= formData.phone ?></td></tr>
+        <tr><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc; font-weight: bold;">เลขที่ (บัตร):</td><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc;"><?= formData.driverLicenseNo ?></td></tr>
+        <tr><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc; font-weight: bold;">หมายเลขเขตพื้นที่:</td><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc;"><?= formData.aviationAreas ?></td></tr>
+        <tr><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc; font-weight: bold;">ประเภทบัตร:</td><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc;"><?= formData.cardType ?></td></tr>
+        <tr><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc; font-weight: bold;">วันหมดอายุ:</td><td style="padding: 5px 0; border-bottom: 1px dashed #cccccc;"><?= formData.expiryDate ?></td></tr>
+      </table>
+
+      <h3 style="color: #3b82f6; margin-top: 30px;">รหัสเข้า-ออกพื้นที่</h3>
+      <div style="text-align: center; margin-bottom: 20px;">
+        <p style="font-weight: bold;">Bar Code:</p>
+        <img src="<?= barcodeUrl ?>" alt="Bar Code" style="max-width: 100%; height: auto; border: 1px solid #ddd; padding: 5px; border-radius: 4px;">
+      </div>
+      <div style="text-align: center; margin-bottom: 20px;">
+        <p style="font-weight: bold;">QR Code:</p>
+        <img src="<?= qrcodeUrl ?>" alt="QR Code" style="width: 150px; height: 150px; border: 1px solid #ddd; padding: 5px; border-radius: 4px;">
+      </div>
+
+    </div>
+  </div>
+</div>
