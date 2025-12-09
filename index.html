@@ -5,58 +5,32 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบสแกนเข้าเขตพื้นที่ - SAKON NAKHON AIRPORT</title>
+    <title>ระบบสแกน - เว็บแอป</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-        /* เพิ่มข้อความแจ้งเตือนกรณีหน้าว่าง */
-        #status-msg {
-            text-align: center;
-            margin-top: 20%;
-            font-family: sans-serif;
-            color: #888;
-            display: none; /* ซ่อนไว้ก่อน */
-        }
+        /* ซ่อน Scrollbar ของตัวหน้าหลัก เพื่อให้ดูเหมือนแอป */
+        iframe { display: block; width: 100%; height: 100vh; border: none; }
     </style>
 </head>
 <body>
 
-    <div id="status-msg">
-        <h2>กรุณาระบุจุดตรวจ (Gate) ใน URL</h2>
-    </div>
-
-    <iframe id="app-frame" 
-            style="width: 100%; height: 100vh; border: none; display: none;" 
-            src="about:blank">
-    </iframe>
+    <iframe id="app-frame" src=""></iframe>
 
     <script>
-        // --- ส่วนตั้งค่า (แก้ไขตรงนี้) ---
-        // ใส่ URL หลักของ Web App (Google Apps Script) ของคุณที่นี่
-        // **ไม่ต้องใส่** เครื่องหมาย ? หรือ parameters ต่อท้าย
+        // --- ส่วนตั้งค่า (แก้ไขตรงนี้ที่เดียว) ---
+        // ใส่ URL ยาวๆ ของ Google Apps Script ของคุณที่นี่
         const BASE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwq4LnwHzolIQY1dgUObIBUZfthQu29hOrOPP7Agx2YbMs7GkNrWySiqS_r79KiBo0XsA/exec"; 
         // -----------------------------
 
-        // 1. ดึงค่า Parameters ทั้งหมดจาก URL ของ Browser (เช่น ?page=scanner&mode=Staff)
-        const urlParams = new URLSearchParams(window.location.search);
-        
-        // 2. ตรวจสอบว่ามี Parameter หรือไม่ (เช็คแบบง่ายๆ)
-        // ถ้ามี page หรือ mode ให้ทำงาน
-        if (urlParams.has('page') || urlParams.has('mode')) {
-            
-            // สร้าง URL ใหม่ที่จะส่งให้ iframe
-            // เอา URL หลัก + parameters ที่ต่อท้าย GitHub Pages มาใส่เลย
-            const targetUrl = BASE_WEB_APP_URL + window.location.search;
-            
-            // สั่งให้ iframe โหลดหน้านั้น และแสดงผล
-            const iframe = document.getElementById('app-frame');
-            iframe.src = targetUrl;
-            iframe.style.display = 'block'; // แสดง iframe
-            
-        } else {
-            // 3. กรณีไม่มี Parameter (โหลดหน้าว่าง)
-            // แสดงข้อความแจ้งเตือน
-            document.getElementById('status-msg').style.display = 'block';
-        }
+        // ดึงค่า Parameters ที่ต่อท้าย URL ปัจจุบันมา (เช่น ?page=scanner&mode=Staff)
+        // ถ้าไม่มีค่าอะไรมา ตัวแปรนี้จะเป็นค่าว่าง ""
+        const queryParams = window.location.search;
+
+        // เอา URL หลัก + ค่า Parameters (ถ้ามี)
+        const finalUrl = BASE_WEB_APP_URL + queryParams;
+
+        // สั่งให้ iframe โหลด URL นั้นทันที
+        document.getElementById('app-frame').src = finalUrl;
     </script>
 
 </body>
