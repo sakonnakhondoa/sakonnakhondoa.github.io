@@ -1,37 +1,74 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <base target="_top">
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบสแกน - เว็บแอป</title>
+    <title>SNO - ระบบเข้าออกเขตพื้นที่</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-        /* ซ่อน Scrollbar ของตัวหน้าหลัก เพื่อให้ดูเหมือนแอป */
-        iframe { display: block; width: 100%; height: 100vh; border: none; }
+        /* CSS จาก Theme เดิมของคุณ เพื่อให้ UI คงที่ */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        :root {
+            --color-dark-bg: #0F1115;
+            --color-dark-card: #181B21;
+            --color-primary: #50FF6B; /* Runway Green */
+            --text-light: #E6E9EF;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, #0D0F12 0%, #121418 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background-color: var(--color-dark-card);
+        }
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: #000; /* สีเขียวอ่อน ควรใช้ตัวอักษรสีดำ */
+            transition: opacity 0.2s;
+        }
+        .btn-primary:hover {
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
+    <div class="container mx-auto p-4 max-w-lg">
+        <div class="card p-6 rounded-xl shadow-2xl text-center">
+            <h1 class="text-3xl font-bold mb-6 text-white">ระบบควบคุมการเข้า-ออกพื้นที่</h1>
+            <p class="text-gray-400 mb-8">เลือกฟังก์ชันที่ต้องการใช้งาน</p>
 
-    <iframe id="app-frame" src=""></iframe>
+            <div class="space-y-4">
+                <a href="https://script.google.com/macros/s/AKfycbwq4LnwHzolIQY1dgUObIBUZfthQu29hOrOPP7Agx2YbMs7GkNrWySiqS_r79KiBo0XsA/exec?page=scanner&mode=Staff" 
+                   target="_self" class="block w-full btn-primary font-semibold py-3 px-4 rounded-lg shadow-lg">
+                    สแกนเข้า-ออก (ประตู Staff)
+                </a>
 
-    <script>
-        // --- ส่วนตั้งค่า (แก้ไขตรงนี้ที่เดียว) ---
-        // ใส่ URL ยาวๆ ของ Google Apps Script ของคุณที่นี่
-        const BASE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwq4LnwHzolIQY1dgUObIBUZfthQu29hOrOPP7Agx2YbMs7GkNrWySiqS_r79KiBo0XsA/exec"; 
-        // -----------------------------
+                <a href="https://script.google.com/macros/s/AKfycbwq4LnwHzolIQY1dgUObIBUZfthQu29hOrOPP7Agx2YbMs7GkNrWySiqS_r79KiBo0XsA/exec?page=scanner&mode=ControlPost" 
+                   target="_self" class="block w-full btn-primary font-semibold py-3 px-4 rounded-lg shadow-lg">
+                    สแกนเข้า-ออก (ประตู ControlPost)
+                </a>
 
-        // ดึงค่า Parameters ที่ต่อท้าย URL ปัจจุบันมา (เช่น ?page=scanner&mode=Staff)
-        // ถ้าไม่มีค่าอะไรมา ตัวแปรนี้จะเป็นค่าว่าง ""
-        const queryParams = window.location.search;
+                <a href="https://script.google.com/macros/s/AKfycbwq4LnwHzolIQY1dgUObIBUZfthQu29hOrOPP7Agx2YbMs7GkNrWySiqS_r79KiBo0XsA/exec?page=scanner&mode=Door3" 
+                   target="_self" class="block w-full btn-primary font-semibold py-3 px-4 rounded-lg shadow-lg">
+                    สแกนเข้า-ออก (ประตู 3)
+                </a>
 
-        // เอา URL หลัก + ค่า Parameters (ถ้ามี)
-        const finalUrl = BASE_WEB_APP_URL + queryParams;
+                <a href="https://script.google.com/macros/s/AKfycbwq4LnwHzolIQY1dgUObIBUZfthQu29hOrOPP7Agx2YbMs7GkNrWySiqS_r79KiBo0XsA/exec?page=register" 
+                   target="_self" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg mt-8">
+                    ลงทะเบียนเจ้าหน้าที่
+                </a>
 
-        // สั่งให้ iframe โหลด URL นั้นทันที
-        document.getElementById('app-frame').src = finalUrl;
-    </script>
-
+                <a href="https://script.google.com/macros/s/AKfycbwq4LnwHzolIQY1dgUObIBUZfthQu29hOrOPP7Agx2YbMs7GkNrWySiqS_r79KiBo0XsA/exec" 
+                   target="_self" class="block w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg">
+                    เข้าสู่หน้าแอดมิน/แดชบอร์ด
+                </a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
